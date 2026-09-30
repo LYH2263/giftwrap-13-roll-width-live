@@ -15,7 +15,7 @@ docker compose up --build
 
 ## 主链
 
-盒长宽高 → 包装纸面积 → 展开示意
+盒长宽高 → 包装纸面积（几何口径）→ 按纸卷卷宽折张 sheet_len/sheets → 展开示意
 
 ## 技术栈
 

@@ -8,6 +8,17 @@ def init_db():
     CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT);
     CREATE TABLE IF NOT EXISTS calc_runs(id INTEGER PRIMARY KEY AUTOINCREMENT,box_id INT,overlap REAL,result_json TEXT,note TEXT,created_at TEXT);
     """)
+    # 旧库补列：卷宽/折张快照钉在写入时刻，之后纸张页改卷宽不动旧单
+    existing = {r["name"] for r in c.execute("PRAGMA table_info(calc_runs)").fetchall()}
+    migrations = {
+        "paper_id": "ALTER TABLE calc_runs ADD COLUMN paper_id INTEGER",
+        "roll_width": "ALTER TABLE calc_runs ADD COLUMN roll_width REAL",
+        "sheet_len": "ALTER TABLE calc_runs ADD COLUMN sheet_len REAL",
+        "sheets": "ALTER TABLE calc_runs ADD COLUMN sheets INTEGER",
+    }
+    for name, ddl in migrations.items():
+        if name not in existing:
+            c.execute(ddl)
     if c.execute("SELECT COUNT(*) c FROM boxes").fetchone()["c"] == 0:
         c.executemany("INSERT INTO boxes(name,length,width,height,data_quality,note) VALUES (?,?,?,?,?,?)",[
             ("书型盒",0.30,0.20,0.15,"clean",""),
